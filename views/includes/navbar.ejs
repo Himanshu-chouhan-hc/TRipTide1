@@ -1,19 +1,17 @@
 <nav class="navbar navbar-expand-lg bg-body-tertiary">
   <div class="container-fluid">
-    <a class="navbar-brand" href="/listings"><i class="fa-regular fa-compass" style="color: red;"></i> explore</a>
+    <a class="navbar-brand" href="/listings"><i class="fa-regular fa-compass" style="color: red;"></i> TripTide</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="navbar-nav ms-auto">
-      <form class="d-flex" role="search">
-        <input class="form-control  me-1" type="search" placeholder="Search destination" aria-label="Search"/>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <form class="d-flex my-2 my-lg-0" role="search">
+        <input class="form-control me-1" type="search" placeholder="Search destination" aria-label="Search" />
         <button class="btn btn-outline-success search" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
       </form>
-    </div>
 
-    <!-- <div class="collapse navbar-collapse" id="navbarSupportedContent"> -->
-      
-      <ul class="navbar-nav ms-auto">
+      <ul class="navbar-nav ms-auto mt-3 mt-lg-0">
         <li class="nav-item">
           <a class="nav-link" href="/listings/new">Airbnb Your home</a>
         </li>
@@ -35,6 +33,6 @@
           </li>
         <% } %>
       </ul>
-    <!-- </div> -->
+    </div>
   </div>
 </nav>

@@ -12,7 +12,13 @@ body{
 
 
 .navbar{
-    height: 5rem;
+    min-height: 5rem;
+}
+.navbar .navbar-collapse {
+    align-items: center;
+}
+.navbar .navbar-nav {
+    align-items: center;
 }
 .fa-compass{
     color: red;
@@ -20,10 +26,43 @@ body{
 }
 .nav-link{
     color: #222222 !important;
-    
 }
 .f-links{
     width: 100%;
+}
+
+@media (max-width: 768px) {
+    .navbar .navbar-collapse {
+        background: #fff;
+        padding: 1rem;
+        border-radius: 0 0 0.75rem 0.75rem;
+    }
+    .navbar .navbar-nav {
+        width: 100%;
+        flex-direction: column;
+    }
+    .navbar .nav-item {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 0.5rem;
+    }
+    .navbar .nav-link {
+        width: 100%;
+        padding-left: 0;
+        padding-right: 0;
+    }
+    .navbar form.d-flex {
+        width: 100%;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    .navbar .form-control {
+        width: 100%;
+    }
+    .navbar .search {
+        width: 100%;
+        justify-content: center;
+    }
 }
 .f-social,.b-name{
     width: 100%;
@@ -294,6 +333,31 @@ background-color:rgb(249, 33, 235) ;
     .form-control {
         width: 100%;
     }
+}
+
+.icon-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.75rem;
+}
+
+.icon-item {
+    flex: 1 1 20%;
+    min-width: 3rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f3f3f3;
+    border-radius: 0.75rem;
+    padding: 0.6rem 0.5rem;
+    color: #444;
+    font-size: 1rem;
+}
+
+.icon-item i {
+    pointer-events: none;
 }
 
 @media (max-width: 480px) {
