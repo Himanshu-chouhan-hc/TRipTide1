@@ -43,7 +43,9 @@ async function main() {
 }
 
 
-
+app.get("/", (req, res) => {
+  res.redirect("/listings");
+});
 // const store = MongoStore.create({
 //    mongoUrl: dbUrl,
 //    crypto:{
