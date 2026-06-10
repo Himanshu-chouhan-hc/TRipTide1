@@ -23,75 +23,67 @@ const listings = require("./routes/listings.js");
 const reviews = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
 
-// ------------------- DB CONNECTION -------------------
+// ---------------- DB ----------------
 
 const dbUrl =
-  process.env.NODE_ENV === "production"
-    ? process.env.ATLASDB_URL
-    : "mongodb://127.0.0.1:27017/project";
+  process.env.ATLASDB_URL ||
+  "mongodb://127.0.0.1:27017/project";
 
 async function main() {
   await mongoose.connect(dbUrl);
   console.log("Connected to DB");
 }
 
-main().catch((err) => {
-  console.log(err);
-});
+main().catch(console.log);
 
-// ------------------- EXPRESS SETUP -------------------
+// ---------------- VIEW ENGINE ----------------
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.engine("ejs", ejsMate);
+
+// ---------------- MIDDLEWARE ----------------
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public")));
 
-// ------------------- SESSION STORE -------------------
+// ---------------- SESSION ----------------
 
-let store;
-// Only initialize Mongo-backed session store in production with a provided DB URL.
-if (process.env.NODE_ENV === 'production' && process.env.ATLASDB_URL) {
-  try {
-    store = MongoStore.create({
-      mongoUrl: dbUrl,
-      crypto: {
-        secret: process.env.SECRET || "mysupersecret",
-      },
-      touchAfter: 24 * 3600,
-    });
-
-    store.on("error", (err) => {
-      console.error("Session Store Error:", err);
-    });
-  } catch (e) {
-    console.error("Failed to initialize Mongo session store, falling back to default store:", e);
-    store = undefined;
-  }
-} else {
-  console.warn('Skipping Mongo session store initialization in non-production environment');
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
 }
 
+const store = MongoStore.create({
+  mongoUrl: dbUrl,
+  crypto: {
+    secret: process.env.SECRET,
+  },
+  touchAfter: 24 * 3600,
+});
+
+store.on("error", (err) => {
+  console.log("SESSION STORE ERROR:", err);
+});
+
 const sessionOptions = {
+  store,
   secret: process.env.SECRET || "mysupersecret",
   resave: false,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-    maxAge: 7 * 24 * 60 * 60 * 1000,
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 1000 * 60 * 60 * 24 * 7,
+    expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
   },
 };
-
-if (store) sessionOptions.store = store;
 
 app.use(session(sessionOptions));
 app.use(flash());
 
-// ------------------- PASSPORT -------------------
+// ---------------- PASSPORT ----------------
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -101,27 +93,16 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-// ------------------- GLOBAL VARIABLES -------------------
+// ---------------- LOCALS ----------------
 
 app.use((req, res, next) => {
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
   res.locals.currUser = req.user;
-  
-  // Wrap render to prevent double-sends
-  const originalRender = res.render;
-  res.render = function(view, options, callback) {
-    if (res.headersSent) {
-      console.warn("Attempted to render when headers already sent");
-      return res;
-    }
-    return originalRender.apply(res, arguments);
-  };
-  
   next();
 });
 
-// ------------------- ROUTES -------------------
+// ---------------- ROUTES ----------------
 
 app.get("/", (req, res) => {
   res.redirect("/listings");
@@ -131,29 +112,23 @@ app.use("/listings", listings);
 app.use("/listings/:id/reviews", reviews);
 app.use("/user", userRouter);
 
-// ------------------- ERROR HANDLER -------------------
+// ---------------- ERROR HANDLER ----------------
 
 app.use((err, req, res, next) => {
-  let { statusCode = 500, message = "Something went wrong!" } = err;
+  console.error(err);
 
-  // Prevent rendering if headers already sent (during template rendering errors)
   if (res.headersSent) {
-    console.error("Headers already sent, cannot render error template:", err);
-    return res.end();
+    return next(err);
   }
 
-  try {
-    res.status(statusCode).render("error.ejs", {
-      message,
-    });
-  } catch (renderErr) {
-    console.error("Error rendering error template:", renderErr);
-    // If render fails, send plain text response
-    res.status(statusCode).send(`Error: ${message}`);
-  }
+  const { statusCode = 500, message = "Something went wrong!" } = err;
+
+  res.status(statusCode).render("error.ejs", {
+    message,
+  });
 });
 
-// ------------------- SERVER -------------------
+// ---------------- SERVER ----------------
 
 const PORT = process.env.PORT || 2000;
 
