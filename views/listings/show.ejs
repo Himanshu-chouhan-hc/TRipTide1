@@ -14,9 +14,9 @@
                 <%= Listing.title %>
               </h3>
             </b>
-            <img src="<%= Listing.image.url %>" class="card-img-top" alt="Hotel Image">
+            <img src="<%= Listing.image && Listing.image.url ? Listing.image.url : '/images/placeholder.png' %>" class="card-img-top" alt="Hotel Image">
             <div class="card-body">
-              <p class="card-text">Owned by <%= Listing.owner.username %>
+              <p class="card-text">Owned by <%= Listing.owner ? Listing.owner.username : 'Unknown' %>
               </p>
               <p class="card-text">
                 <%= Listing.description %>
@@ -24,7 +24,7 @@
               <div class="listing-details">
                 <ul>
                   <li><strong>Price:</strong>
-                    <%= Listing.price.toLocaleString("en-IN") %>/Night
+                    <%= (typeof Listing.price === 'number') ? Listing.price.toLocaleString('en-IN') : 'N/A' %>/Night
                   </li>
                   <li><strong>Location:</strong>
                     <%= Listing.location %>
@@ -34,7 +34,7 @@
                   </li>
                 </ul>
               </div>
-              <% if(currUser && currUser._id.equals(Listing.owner._id)) {%>
+              <% if (currUser && Listing.owner && currUser._id.equals(Listing.owner._id)) { %>
                 <div class="button-group">
                   <form action="/listings/<%= Listing._id %>?_method=DELETE" method="POST">
                     <button class="btn btn-danger">Delete This Hotel!</button>

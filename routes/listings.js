@@ -21,7 +21,7 @@ const upload = multer({ storage });
 //index
 router.get("/", wrapAsync (listingController.index) );
 //new route
-router.get("/new",isLoggedIn,validateListing, listingController.renderNewForm);
+router.get("/new", isLoggedIn, listingController.renderNewForm);
 
 router.post("/", upload.single('Listing[image]'), isLoggedIn, validateListing, wrapAsync(async (req, res) => {
   const newListing = new Listing(req.body.Listing);
@@ -40,19 +40,22 @@ router.post("/", upload.single('Listing[image]'), isLoggedIn, validateListing, w
 
 
 //edit route
-router.get("/:id/edit",isLoggedIn, wrapAsync(async (req, res) => {
+//edit route
+router.get("/:id/edit", isLoggedIn, wrapAsync(async (req, res) => {
   const { id } = req.params;
   const Listings = await Listing.findById(id);
-  let originalImage = Listings.image.url;
-  originalImage = originalImage=originalImage.replace("/upload","/upload/h_30,w_25");
-  res.render("listings/edit", { Listings ,originalImage});
+  let originalImage = '/images/placeholder.png';
+  if (Listings && Listings.image && Listings.image.url) {
+    originalImage = Listings.image.url.replace("/upload", "/upload/h_30,w_25");
+  }
+  res.render("listings/edit", { Listings, originalImage });
 }));
 //show route
 router.get("/:id",wrapAsync(listingController.showListing));
 //delete route
 router.delete("/:id", isLoggedIn, wrapAsync(listingController.deleteListing));
 //create route
-router.post("/:id",isLoggedIn, wrapAsync(listingController.createListing));
+// NOTE: removed accidental POST /:id route (create should be POST /)
 
 router.put("/:id", upload.single('Listing[image]'),isLoggedIn, wrapAsync(listingController.updateListing));
 

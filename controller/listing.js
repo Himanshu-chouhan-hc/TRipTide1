@@ -40,11 +40,11 @@ module.exports.deleteListing = async (req, res) => {
 
 // create route (if creating new listing)
 module.exports.createListing = async (req, res) => {
-  let url = req.file.path;
-  let filename = req.file.filename;
   const newListing = new Listing(req.body.Listing);
   newListing.owner = req.user._id;
-  newListing.image = {url,filename};
+  if (req.file) {
+    newListing.image = { url: req.file.path, filename: req.file.filename };
+  }
   await newListing.save();
   return res.redirect(`/listings/${newListing._id}`);
 };
@@ -52,12 +52,10 @@ module.exports.createListing = async (req, res) => {
 // update route (if updating existing listing)
 module.exports.updateListing = async (req, res) => {
   const { id } = req.params;
-  await Listing.findByIdAndUpdate(id, { ...req.body.Listing });
-  if(req.file){
-  let url = req.file.path;
-  let filename = req.file.filename;
-  newListing.image = {url,filename};
-  await Listing.save();
+  const listing = await Listing.findByIdAndUpdate(id, { ...req.body.Listing }, { new: true });
+  if (req.file && listing) {
+    listing.image = { url: req.file.path, filename: req.file.filename };
+    await listing.save();
   }
   return res.redirect(`/listings/${id}`);
 };
