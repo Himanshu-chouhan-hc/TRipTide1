@@ -107,6 +107,17 @@ app.use((req, res, next) => {
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
   res.locals.currUser = req.user;
+  
+  // Wrap render to prevent double-sends
+  const originalRender = res.render;
+  res.render = function(view, options, callback) {
+    if (res.headersSent) {
+      console.warn("Attempted to render when headers already sent");
+      return res;
+    }
+    return originalRender.apply(res, arguments);
+  };
+  
   next();
 });
 
@@ -125,9 +136,21 @@ app.use("/user", userRouter);
 app.use((err, req, res, next) => {
   let { statusCode = 500, message = "Something went wrong!" } = err;
 
-  res.status(statusCode).render("error.ejs", {
-    message,
-  });
+  // Prevent rendering if headers already sent (during template rendering errors)
+  if (res.headersSent) {
+    console.error("Headers already sent, cannot render error template:", err);
+    return res.end();
+  }
+
+  try {
+    res.status(statusCode).render("error.ejs", {
+      message,
+    });
+  } catch (renderErr) {
+    console.error("Error rendering error template:", renderErr);
+    // If render fails, send plain text response
+    res.status(statusCode).send(`Error: ${message}`);
+  }
 });
 
 // ------------------- SERVER -------------------

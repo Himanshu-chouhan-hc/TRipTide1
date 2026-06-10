@@ -87,16 +87,16 @@
                         <div
                           class="avatar bg-primary text-white rounded-circle me-2 d-flex justify-content-center align-items-center"
                           style="width: 40px; height: 40px; font-weight: 600;">
-                          <%= review.author ? review.author.username[0] : "A" %>
+                          <%= (review.author && review.author.username && review.author.username.length > 0) ? review.author.username[0] : "A" %>
                         </div>
                         <h5 class="card-title fw-semibold mb-0">
-                          <%= review.author ? review.author.username : "Anonymous" %>
+                          <%= (review.author && review.author.username) ? review.author.username : "Anonymous" %>
                         </h5>
                       </div>
                       <p class="card-text text-muted mb-3">
-                        <%= review.comment %>
+                        <%= (review.comment) ? review.comment : '' %>
                       </p>
-                      <p class="starability-result" data-rating="<%=review.rating%>"></p>
+                      <p class="starability-result" data-rating="<%= (review.rating) ? review.rating : 0 %>"></p>
                     </div>
                     <% if(currUser && ( (review.owner && currUser._id.equals(review.owner._id)) || (Listing.owner &&
                       currUser._id.equals(Listing.owner._id)) )) { %>
