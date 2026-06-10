@@ -19,7 +19,7 @@
               <p class="card-text">Owned by <%= Listing.owner ? Listing.owner.username : 'Unknown' %>
               </p>
               <p class="card-text">
-                <%= Listing.description %>
+                <%= Listing.description ? Listing.description : '' %>
               </p>
               <div class="listing-details">
                 <ul>
@@ -27,10 +27,10 @@
                     <%= (typeof Listing.price === 'number') ? Listing.price.toLocaleString('en-IN') : 'N/A' %>/Night
                   </li>
                   <li><strong>Location:</strong>
-                    <%= Listing.location %>
+                    <%= Listing.location ? Listing.location : 'Unknown' %>
                   </li>
                   <li><strong>Country:</strong>
-                    <%= Listing.country %>
+                    <%= Listing.country ? Listing.country : 'Unknown' %>
                   </li>
                 </ul>
               </div>
@@ -78,8 +78,9 @@
         </div>
         <% } %>
           <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mt-3">
-            <% for (let review of Listing.reviews) { %>
-              <div class="col">
+            <% if (Listing.reviews && Listing.reviews.length > 0) { %>
+              <% for (let review of Listing.reviews) { %>
+                <div class="col">
                 <div class="card review-card border-0 shadow-sm h-100">
                   <div class="card-body d-flex flex-column justify-content-between">
                     <div>
